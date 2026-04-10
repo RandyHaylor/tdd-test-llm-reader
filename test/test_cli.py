@@ -2,9 +2,10 @@ import pytest
 from src.fastReader.cli import parse_args
 
 def test_load_subcommand():
-    """Test parsing 'load' correctly (no args)."""
-    args = parse_args(['load'])
+    """Test parsing 'load <file>' correctly (file path as positional arg)."""
+    args = parse_args(['load', '/path/to/file.md'])
     assert args.command == 'load'
+    assert args.file == '/path/to/file.md'
 
 def test_toc_chapters():
     """Test parsing 'toc --chapters <hash>' correctly (manifest as positional arg)."""

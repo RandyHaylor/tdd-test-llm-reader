@@ -21,7 +21,8 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
 
     # 'load' subcommand
-    subparsers.add_parser('load', help='Scan a document from stdin and create manifest')
+    load_parser = subparsers.add_parser('load', help='Scan a document file and create manifest')
+    load_parser.add_argument('file', help='Path to document file')
 
     # 'toc' subcommand
     toc_parser = subparsers.add_parser('toc', help='Display table of contents')
@@ -58,8 +59,11 @@ def main(argv: Optional[List[str]] = None):
     config = load_config(DEFAULT_CONFIG_PATH)
 
     if args.command == 'load':
-        stdin_text = sys.stdin.read()
-        result = run_load(stdin_text, DEFAULT_CACHE_DIR, config)
+        try:
+            result = run_load(args.file, DEFAULT_CACHE_DIR, config)
+        except FileNotFoundError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
 
         # Format summary output as human-readable text
         manifest_id = result['manifest_id']
