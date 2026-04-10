@@ -4,11 +4,12 @@ from src.fastReader.cache import load_manifest
 from src.fastReader.models import Document, Marker
 
 def run_get(
-    manifest_hash: str, 
-    cache_dir: str, 
-    chapter: Optional[int] = None, 
-    section: Optional[int] = None, 
-    page: Optional[int] = None, 
+    manifest_hash: str,
+    cache_dir: str,
+    chapter: Optional[int] = None,
+    section: Optional[int] = None,
+    subsection: Optional[int] = None,
+    page: Optional[int] = None,
     block: Optional[int] = None
 ) -> str:
     """Execute the get command logic.
@@ -33,6 +34,9 @@ def run_get(
     elif section is not None:
         m_type = "section"
         target_marker = next((m for m in manifest.markers.get(m_type, []) if m.index == section), None)
+    elif subsection is not None:
+        m_type = "subsection"
+        target_marker = next((m for m in manifest.markers.get(m_type, []) if m.index == subsection), None)
     elif page is not None:
         m_type = "page_break"
         target_marker = next((m for m in manifest.markers.get(m_type, []) if m.index == page), None)
@@ -41,7 +45,8 @@ def run_get(
         target_marker = next((m for m in manifest.markers.get(m_type, []) if m.index == block), None)
         
     if not target_marker:
-        return f"Error: {m_type} {chapter or section or page or block} not found."
+        idx = chapter or section or subsection or page or block
+        return f"Error: {m_type} {idx} not found."
         
     # 2. Find the "next" marker of the SAME OR HIGHER level to determine boundary
     # Level hierarchy: chapter > section > page > block

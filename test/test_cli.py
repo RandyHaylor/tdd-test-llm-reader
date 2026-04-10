@@ -34,3 +34,10 @@ def test_get_block():
     assert args.command == 'get'
     assert args.block == 7
     assert args.manifest == 'hash789'
+
+def test_get_subsection():
+    """Test parsing 'get --subsection 5 --manifest <hash>' correctly."""
+    args = parse_args(['get', '--subsection', '5', '--manifest', 'hash000'])
+    assert args.command == 'get'
+    assert args.subsection == 5
+    assert args.manifest == 'hash000'

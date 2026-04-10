@@ -48,10 +48,36 @@ def test_run_get_chapter():
         }
         run_load(content, cache_dir, config)
         h = generate_hash(content)
-        
+
         result = run_get(h, cache_dir, chapter=1)
         assert "# Chapter 1" in result
         assert "Section A" in result
         assert "# Chapter 2" not in result
+    finally:
+        shutil.rmtree(cache_dir)
+
+def test_run_get_subsection():
+    """Test retrieving a specific subsection's content."""
+    cache_dir = tempfile.mkdtemp()
+    try:
+        content = "# Chapter 1\n## Section A\n### Subsection A1\nContent in A1\n### Subsection A2\nContent in A2"
+        config = {
+            "chapter": {"patterns": ["^# "]},
+            "section": {"patterns": ["^## "]},
+            "subsection": {"patterns": ["^### "]},
+            "page_break": {"patterns": []},
+            "page": {"patterns": []},
+            "double_line_break": {"patterns": []},
+            "block": {"size": 800}
+        }
+        run_load(content, cache_dir, config)
+        h = generate_hash(content)
+
+        # Get Subsection 1 (Subsection A1)
+        result = run_get(h, cache_dir, subsection=1)
+        assert "Subsection A1" in result
+        assert "Content in A1" in result
+        assert "Subsection A2" not in result
+
     finally:
         shutil.rmtree(cache_dir)

@@ -39,6 +39,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     get_parser.add_argument('--manifest', required=True, help='Manifest hash')
     get_parser.add_argument('--chapter', type=int, help='Chapter number')
     get_parser.add_argument('--section', type=int, help='Section number')
+    get_parser.add_argument('--subsection', type=int, help='Subsection number')
     get_parser.add_argument('--page', type=int, help='Page number')
     get_parser.add_argument('--block', type=int, help='Block number')
 
@@ -105,6 +106,7 @@ def main(argv: Optional[List[str]] = None):
                 DEFAULT_CACHE_DIR,
                 chapter=args.chapter,
                 section=args.section,
+                subsection=args.subsection,
                 page=args.page,
                 block=args.block
             )
