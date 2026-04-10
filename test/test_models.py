@@ -11,14 +11,12 @@ class TestMarker:
             marker_type="chapter",
             index=1,
             line=5,
-            offset=100,
-            preview="Introduction to the system..."
+            char_index=2
         )
         assert marker.marker_type == "chapter"
         assert marker.index == 1
         assert marker.line == 5
-        assert marker.offset == 100
-        assert marker.preview == "Introduction to the system..."
+        assert marker.char_index == 2
 
     def test_marker_valid_types(self):
         """Test that Marker accepts all valid marker types."""
@@ -28,8 +26,7 @@ class TestMarker:
                 marker_type=marker_type,
                 index=1,
                 line=1,
-                offset=0,
-                preview="test"
+                char_index=0
             )
             assert marker.marker_type == marker_type
 
@@ -40,8 +37,7 @@ class TestMarker:
                 marker_type="invalid_type",
                 index=1,
                 line=1,
-                offset=0,
-                preview="test"
+                char_index=0
             )
 
 
@@ -50,8 +46,8 @@ class TestManifest:
         """Test that a Manifest can be created with all required fields."""
         markers = {
             "chapters": [
-                Marker("chapter", 1, 1, 0, "Introduction..."),
-                Marker("chapter", 2, 98, 4820, "Architecture..."),
+                Marker("chapter", 1, 1, 0),
+                Marker("chapter", 2, 98, 0),
             ],
             "sections": [],
         }

@@ -53,22 +53,21 @@ def scan_document(document: Document, config: dict) -> Manifest:
     blank_count = 0
 
     for line_num, line in enumerate(document.lines, start=1):
-        # Calculate character offset for this line
-        offset = sum(len(document.lines[i]) + 1 for i in range(line_num - 1))
+        # Calculate char_index (position of first non-whitespace char)
+        stripped_line = line.lstrip()
+        char_index = len(line) - len(stripped_line)
 
         # Check for double line breaks (2+ consecutive blank lines)
         if line.strip() == "":
             blank_count += 1
             if blank_count >= 2 and not previous_blank:
                 marker_indices["double_line_break"] += 1
-                preview = "(blank lines)"
                 markers["double_line_break"].append(
                     Marker(
                         marker_type="double_line_break",
                         index=marker_indices["double_line_break"],
                         line=line_num,
-                        offset=offset,
-                        preview=preview
+                        char_index=0
                     )
                 )
                 previous_blank = True
@@ -85,14 +84,12 @@ def scan_document(document: Document, config: dict) -> Manifest:
                 for pattern in patterns:
                     if re.search(pattern, line):
                         marker_indices[marker_type] += 1
-                        preview = _get_preview(line, config[marker_type].get("preview_length", 30))
                         markers[marker_type].append(
                             Marker(
                                 marker_type=marker_type,
                                 index=marker_indices[marker_type],
                                 line=line_num,
-                                offset=offset,
-                                preview=preview
+                                char_index=char_index
                             )
                         )
                         break  # Only match one pattern per line per marker type
@@ -113,22 +110,6 @@ def scan_document(document: Document, config: dict) -> Manifest:
     return manifest
 
 
-def _get_preview(text: str, length: int = 30) -> str:
-    """Extract a preview string from text, limited to specified length.
-
-    Args:
-        text: The text to preview
-        length: Maximum length of preview
-
-    Returns:
-        Preview string, truncated to length if needed
-    """
-    preview = text.strip()
-    if len(preview) > length:
-        preview = preview[:length] + "..."
-    return preview
-
-
 def _create_blocks(document: Document, markers: Dict[str, List[Marker]],
                    marker_indices: Dict[str, int], block_size: int) -> None:
     """Create block fallback chunks in the document.
@@ -146,21 +127,23 @@ def _create_blocks(document: Document, markers: Dict[str, List[Marker]],
     while offset < len(content):
         block_num += 1
         block_end = min(offset + block_size, len(content))
-        block_content = content[offset:block_end]
 
         # Find the line number where this block starts
         line_num = content[:offset].count('\n') + 1
 
-        # Get preview
-        preview = _get_preview(block_content, 30)
+        # Calculate char_index within that line
+        last_newline = content.rfind('\n', 0, offset)
+        if last_newline == -1:
+            char_index = offset
+        else:
+            char_index = offset - (last_newline + 1)
 
         markers["block"].append(
             Marker(
                 marker_type="block",
                 index=block_num,
                 line=line_num,
-                offset=offset,
-                preview=preview
+                char_index=char_index
             )
         )
 

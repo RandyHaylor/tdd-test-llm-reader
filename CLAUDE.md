@@ -1,3 +1,8 @@
+### FOLLOW THE PLAN AT /home/aikenyon/.claude/plans/humming-doodling-wind.md
+
+
+
+
 # FastReader — Document Structure Layer for AI Agents
 
 ## Purpose

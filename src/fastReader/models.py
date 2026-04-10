@@ -10,8 +10,7 @@ class Marker:
     marker_type: str
     index: int
     line: int
-    offset: int
-    preview: str
+    char_index: int  # Within-line position where content starts (after whitespace)
 
     def __post_init__(self):
         if self.marker_type not in VALID_MARKER_TYPES:

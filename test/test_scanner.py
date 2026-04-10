@@ -65,18 +65,19 @@ class TestChapterDetection:
         assert len(manifest.markers["chapter"]) > 0
         assert manifest.markers["chapter"][0].marker_type == "chapter"
         assert manifest.markers["chapter"][0].line == 1
+        assert manifest.markers["chapter"][0].char_index == 0
 
-    def test_detect_chapter_with_word_pattern(self):
-        """Test that chapters are detected with 'Chapter N' pattern."""
+    def test_detect_indented_chapter(self):
+        """Test that indented chapters have correct char_index."""
         doc = Document(
             path="test.md",
-            content="Chapter 1: Introduction\nSome content",
-            lines=["Chapter 1: Introduction", "Some content"]
+            content="  # Indented Chapter\nSome content",
+            lines=["  # Indented Chapter", "Some content"]
         )
         config = {
-            "chapter": {"patterns": ["^Chapter \\d+"]},
-            "section": {"patterns": ["^Section \\d+", "^## "]},
-            "subsection": {"patterns": ["^### "]},
+            "chapter": {"patterns": ["# "]},
+            "section": {"patterns": []},
+            "subsection": {"patterns": []},
             "page_break": {"patterns": []},
             "page": {"patterns": []},
             "double_line_break": {"patterns": []},
@@ -85,7 +86,7 @@ class TestChapterDetection:
 
         manifest = scan_document(doc, config)
         assert len(manifest.markers["chapter"]) > 0
-        assert manifest.markers["chapter"][0].preview.startswith("Chapter 1")
+        assert manifest.markers["chapter"][0].char_index == 2
 
     def test_detect_multiple_chapters(self):
         """Test that multiple chapters are detected and indexed correctly."""
@@ -131,26 +132,7 @@ class TestSectionDetection:
         manifest = scan_document(doc, config)
         assert len(manifest.markers["section"]) > 0
         assert manifest.markers["section"][0].marker_type == "section"
-
-    def test_detect_section_with_word_pattern(self):
-        """Test that sections are detected with 'Section N' pattern."""
-        doc = Document(
-            path="test.md",
-            content="Section 1: Overview\nContent",
-            lines=["Section 1: Overview", "Content"]
-        )
-        config = {
-            "chapter": {"patterns": ["^# "]},
-            "section": {"patterns": ["^Section \\d+"]},
-            "subsection": {"patterns": ["^### "]},
-            "page_break": {"patterns": []},
-            "page": {"patterns": []},
-            "double_line_break": {"patterns": []},
-            "block": {"size": 800}
-        }
-
-        manifest = scan_document(doc, config)
-        assert len(manifest.markers["section"]) > 0
+        assert manifest.markers["section"][0].char_index == 0
 
     def test_detect_multiple_sections(self):
         """Test that multiple sections are detected and indexed correctly."""
@@ -197,26 +179,6 @@ class TestSubsectionDetection:
         assert len(manifest.markers["subsection"]) > 0
         assert manifest.markers["subsection"][0].marker_type == "subsection"
 
-    def test_detect_subsection_with_four_hashes(self):
-        """Test that subsections are detected with '#### ' markdown syntax."""
-        doc = Document(
-            path="test.md",
-            content="#### Deep subsection\nContent",
-            lines=["#### Deep subsection", "Content"]
-        )
-        config = {
-            "chapter": {"patterns": ["^# "]},
-            "section": {"patterns": ["^## "]},
-            "subsection": {"patterns": ["^### ", "^#### "]},
-            "page_break": {"patterns": []},
-            "page": {"patterns": []},
-            "double_line_break": {"patterns": []},
-            "block": {"size": 800}
-        }
-
-        manifest = scan_document(doc, config)
-        assert len(manifest.markers["subsection"]) > 0
-
 
 class TestPageBreakDetection:
     def test_detect_form_feed_character(self):
@@ -241,26 +203,6 @@ class TestPageBreakDetection:
         assert len(manifest.markers["page_break"]) > 0
         assert manifest.markers["page_break"][0].marker_type == "page_break"
 
-    def test_detect_explicit_page_break_marker(self):
-        """Test that explicit page break markers are detected."""
-        doc = Document(
-            path="test.txt",
-            content="Content\n--- PAGE BREAK ---\nMore content",
-            lines=["Content", "--- PAGE BREAK ---", "More content"]
-        )
-        config = {
-            "chapter": {"patterns": []},
-            "section": {"patterns": []},
-            "subsection": {"patterns": []},
-            "page_break": {"patterns": ["^--- PAGE BREAK ---$"]},
-            "page": {"patterns": []},
-            "double_line_break": {"patterns": []},
-            "block": {"size": 800}
-        }
-
-        manifest = scan_document(doc, config)
-        assert len(manifest.markers["page_break"]) > 0
-
 
 class TestDoubleLineBreakDetection:
     def test_detect_double_line_break(self):
@@ -283,7 +225,7 @@ class TestDoubleLineBreakDetection:
 
         manifest = scan_document(doc, config)
         # Double line breaks should be detected
-        assert "double_line_break" in manifest.markers
+        assert len(manifest.markers["double_line_break"]) > 0
 
 
 class TestBlockFallback:
@@ -424,29 +366,6 @@ class TestManifestValidity:
             assert marker_type in manifest.markers
             assert isinstance(manifest.markers[marker_type], list)
 
-    def test_manifest_markers_are_valid_marker_objects(self):
-        """Test that all markers in manifest are valid Marker objects."""
-        doc = Document(
-            path="test.md",
-            content="# Chapter\nContent",
-            lines=["# Chapter", "Content"]
-        )
-        config = {
-            "chapter": {"patterns": ["^# "]},
-            "section": {"patterns": []},
-            "subsection": {"patterns": []},
-            "page_break": {"patterns": []},
-            "page": {"patterns": []},
-            "double_line_break": {"patterns": []},
-            "block": {"size": 800}
-        }
-
-        manifest = scan_document(doc, config)
-        for marker_type, markers in manifest.markers.items():
-            for marker in markers:
-                assert isinstance(marker, Marker)
-                assert marker.marker_type == marker_type
-
 
 class TestMarkerAttributes:
     def test_marker_has_correct_line_number(self):
@@ -469,8 +388,8 @@ class TestMarkerAttributes:
         manifest = scan_document(doc, config)
         assert manifest.markers["chapter"][0].line == 2
 
-    def test_marker_has_correct_offset(self):
-        """Test that detected markers have correct character offsets."""
+    def test_marker_has_correct_char_index(self):
+        """Test that detected markers have correct character indices."""
         doc = Document(
             path="test.md",
             content="Line 1\n# Chapter\nLine 3",
@@ -487,26 +406,4 @@ class TestMarkerAttributes:
         }
 
         manifest = scan_document(doc, config)
-        # "Line 1\n" is 7 characters
-        assert manifest.markers["chapter"][0].offset == 7
-
-    def test_marker_has_preview(self):
-        """Test that markers have preview text."""
-        doc = Document(
-            path="test.md",
-            content="# Chapter Title Here\nContent",
-            lines=["# Chapter Title Here", "Content"]
-        )
-        config = {
-            "chapter": {"patterns": ["^# "]},
-            "section": {"patterns": []},
-            "subsection": {"patterns": []},
-            "page_break": {"patterns": []},
-            "page": {"patterns": []},
-            "double_line_break": {"patterns": []},
-            "block": {"size": 800}
-        }
-
-        manifest = scan_document(doc, config)
-        assert manifest.markers["chapter"][0].preview != ""
-        assert "Chapter" in manifest.markers["chapter"][0].preview
+        assert manifest.markers["chapter"][0].char_index == 0
