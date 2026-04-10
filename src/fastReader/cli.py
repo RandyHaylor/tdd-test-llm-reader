@@ -59,7 +59,18 @@ def main(argv: Optional[List[str]] = None):
     if args.command == 'load':
         stdin_text = sys.stdin.read()
         result = run_load(stdin_text, DEFAULT_CACHE_DIR, config)
-        print(json.dumps(result, indent=2))
+
+        # Format summary output as human-readable text
+        manifest_id = result['manifest_id']
+        summary = result['summary']
+
+        print(f"FastReader found the following:")
+        for key, count in summary.items():
+            if count > 0:
+                label = key.replace('_', ' ').title()
+                print(f"  {label}: {count}")
+
+        print(f"\nTo browse, run: python3 -m src.fastReader.cli toc --sections {manifest_id}")
         
     elif args.command == 'toc':
         marker_types = []
