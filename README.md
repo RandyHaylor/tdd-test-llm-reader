@@ -1,14 +1,11 @@
 # fastReader
 
-FastReader is a document indexing layer for AI agents that reduces token usage, speeds up document traversal, and improves output quality by giving agents structured access to large documents instead of reading them blindly.
-
-## What this actually is
-
-- An efficient wrapper around clever search and scanning tools that counts how documents are structurally separated (chapters, sections, subsections, pages, blocks) and presents a token-efficient interface for previewing and retrieving exactly the right scope.
-- More useful than the current paradigm of LLMs keyword-searching or reading chunk by chunk — because searches return the full container hierarchy (chapter → section → subsection) containing each hit, with previews, so the agent can load exactly the right section in a single command.
-- Agents stop loading random text windows and doing multiple reads above and below to fill in context — instead they get a structured hit with its containing section boundaries and retrieve precisely that.
-- Search quality is higher and more comprehensive than an agent guessing which files to open. Without FastReader, agents pick the files that sound most relevant and hope for the best — missing content spread across multiple files or buried in unexpected locations. FastReader searches across all loaded files simultaneously and surfaces every hit with its structural context, so the agent knows exactly where the answer is before reading a single line of content.
-- Exceptionally well-suited for scanning and overview tasks. A `toc` call across multiple files gives the agent a complete structural map — chapters, sections, subsections — at near-zero token cost, with no content loaded at all. The agent can then `get` only the sections it needs to fill in detail. Tested against a direct file-read approach on the same task, FastReader produced a more accurate, better-structured overview at roughly half the token usage.
+- A document indexing layer for AI agents that reduces token usage, speeds up document traversal, and improves output quality by giving agents structured access to large documents instead of reading them blindly.
+  - An efficient wrapper around clever search and scanning tools that counts how documents are structurally separated (chapters, sections, subsections, pages, blocks) and presents a token-efficient interface for previewing and retrieving exactly the right scope.
+  - More useful than the current paradigm of LLMs keyword-searching or reading chunk by chunk — because searches return the full container hierarchy (chapter → section → subsection) containing each hit, with previews, so the agent can load exactly the right section in a single command.
+  - Agents stop loading random text windows and doing multiple reads above and below to fill in context — instead they get a structured hit with its containing section boundaries and retrieve precisely that.
+  - Search quality is higher and more comprehensive than an agent guessing which files to open. Without fastReader, agents pick the files that sound most relevant and hope for the best — missing content spread across multiple files or buried in unexpected locations. fastReader searches across all loaded files simultaneously and surfaces every hit with its structural context, so the agent knows exactly where the answer is before reading a single line of content.
+  - Exceptionally well-suited for scanning and overview tasks. A `toc` call across multiple files gives the agent a complete structural map — chapters, sections, subsections — at near-zero token cost, with no content loaded at all. The agent can then `get` only the sections it needs to fill in detail. Tested against a direct file-read approach on the same task, fastReader produced a more accurate, better-structured overview at roughly half the token usage.
 
 ---
 
