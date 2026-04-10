@@ -12,12 +12,12 @@ from src.fastReader.cache import (
 from src.fastReader.models import Manifest, Marker
 
 def test_generate_hash_consistency():
-    """T15: generate_hash(content) returns consistent hash for same content."""
+    """T15: generate_hash(content) returns consistent 8-char mini-hash for same content."""
     content = "Hello world"
     h1 = generate_hash(content)
     h2 = generate_hash(content)
     assert h1 == h2
-    assert len(h1) == 64  # SHA-256
+    assert len(h1) == 8  # 8-char SHA-256 prefix
 
 def test_generate_hash_different_content():
     """T16: generate_hash(content) returns different hash for different content."""

@@ -6,8 +6,8 @@ from typing import Dict, List
 from src.fastReader.models import Manifest, Marker
 
 def generate_hash(content: str) -> str:
-    """Generate a SHA-256 hash of the content."""
-    return hashlib.sha256(content.encode('utf-8')).hexdigest()
+    """Generate an 8-char mini-hash (SHA-256 prefix) of the content."""
+    return hashlib.sha256(content.encode('utf-8')).hexdigest()[:8]
 
 def save_text_to_cache(content: str, cache_dir: str) -> str:
     """Save content to cache directory as <hash>.txt."""
