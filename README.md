@@ -19,7 +19,22 @@
 - Exceptionally well-suited for scanning and overview tasks
   - `toc` gives a complete structural map at near-zero token cost — no content loaded at all
   - Agent then `get`s only the sections needed
-  - Tested vs. direct file-read: more accurate, better-structured overview at roughly half the token usage
+
+---
+
+## Case Studies
+
+### Overview task — 3 Claude plugin doc files
+
+Two agents given the same task: *"give me an overview of what's covered in these three files."*
+
+| | fastReader agent | direct file-read agent |
+|---|---|---|
+| Tokens | **17,183** | 30,871 |
+| Tool calls | 10 | 4 |
+| Output quality | Mapped directly to document's actual section hierarchy | Agent's interpretation of what it skimmed |
+
+fastReader used more tool calls but nearly half the tokens. More importantly, the output was better — structured by the document itself rather than the agent guessing at what mattered.
 
 ---
 
