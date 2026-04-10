@@ -113,6 +113,39 @@ b16405a5 (hooks.md): 3 hits
     chapter 2 ln 83  # .claude/hooks/block-rm.sh  section 2 ln 145  ## Configuration
 ```
 
+### 5. web — search the web or fetch a URL
+
+```
+$ python3 -m fastReader.web search "python asyncio" --limit 4
+
+Searching DDG: python asyncio ...
+  fastreader-search.md                     hash:458c6f9b  sections:4  blocks:4
+
+  Browse: python3 -m fastReader.toc 458c6f9b --sections
+  Search: python3 -m fastReader.search <keywords> --manifests 458c6f9b
+```
+
+```
+$ python3 -m fastReader.toc 458c6f9b --sections
+
+section 1  ln 1  ## asyncio — Asynchronous I/O
+section 2  ln 8  ## asyncio in Python - Geeksfo
+section 3  ln 15  ## Python asyncio: Complete Gu
+section 4  ln 22  ## Practical Guide to Asynchro
+```
+
+```
+$ python3 -m fastReader.web url https://docs.ollama.com/capabilities/tool-calling --out /tmp/ollama-tool.md
+
+Fetching https://docs.ollama.com/capabilities/tool-calling ...
+  ollama-tool.md                           hash:d88855ec  chapters:20  blocks:23
+
+  Browse: python3 -m fastReader.toc d88855ec --sections
+  Search: python3 -m fastReader.search <keywords> --manifests d88855ec
+```
+
+Search results and fetched pages are automatically indexed — the manifest hash is ready to `toc`, `get`, and `search` immediately. No install required; uses Python's stdlib and a bundled HTML parser.
+
 ---
 
 ## CLI Reference
@@ -122,7 +155,7 @@ b16405a5 (hooks.md): 3 hits
 ### load
 
 ```bash
-python3 -m <skill folder>/fastReader.load <file> [file2 ...]
+PYTHONPATH=<skill folder parent> python3 -m fastReader.load <file> [file2 ...]
   [--search <keywords>] [--exact] [--case-sensitive] [--all] [--sample-size N]
 ```
 
@@ -131,13 +164,13 @@ Single file returns verbose output with browse/search hints. Multiple files retu
 ### read
 
 ```bash
-python3 -m <skill folder>/fastReader.read <file> [--offset N] [--limit N]
+PYTHONPATH=<skill folder parent> python3 -m fastReader.read <file> [--offset N] [--limit N]
 ```
 
 ### toc
 
 ```bash
-python3 -m <skill folder>/fastReader.toc <hash> --sections [--chapters] [--subsections] [--pages] [--blocks]
+PYTHONPATH=<skill folder parent> python3 -m fastReader.toc <hash> --sections [--chapters] [--subsections] [--pages] [--blocks]
   [--sample-size N]   # characters per preview (default: 30)
   [--limit N]         # max entries returned (default: 15, 0 = no limit)
 ```
@@ -145,13 +178,13 @@ python3 -m <skill folder>/fastReader.toc <hash> --sections [--chapters] [--subse
 ### get
 
 ```bash
-python3 -m <skill folder>/fastReader.get <hash> --section N [--chapter N] [--subsection N] [--page N] [--block N]
+PYTHONPATH=<skill folder parent> python3 -m fastReader.get <hash> --section N [--chapter N] [--subsection N] [--page N] [--block N]
 ```
 
 ### search
 
 ```bash
-python3 -m <skill folder>/fastReader.search <keywords> --manifests <hash1> [hash2 ...]
+PYTHONPATH=<skill folder parent> python3 -m fastReader.search <keywords> --manifests <hash1> [hash2 ...]
   [--exact]           # whole-word match
   [--case-sensitive]  # default is case-insensitive
   [--all]             # all keywords must appear on same line (default: any)
@@ -159,6 +192,15 @@ python3 -m <skill folder>/fastReader.search <keywords> --manifests <hash1> [hash
 ```
 
 Results are grouped by `hash (filename)`, each hit showing line number, preview, and containing chapter/section/subsection.
+
+### web
+
+```bash
+PYTHONPATH=<skill folder parent> python3 -m fastReader.web search <keywords> [--limit N] [--out /tmp/file.md]
+PYTHONPATH=<skill folder parent> python3 -m fastReader.web url <url> [--out /tmp/file.md]
+```
+
+Fetches and indexes in one step. Default output file is `/tmp/fastreader-search.md` (search) or `/tmp/fastreader-url.md` (url). Uses DuckDuckGo HTML search — no API key required. HTML is parsed with a bundled stdlib-compatible parser; no third-party packages needed.
 
 ## Structural Markers Detected
 
