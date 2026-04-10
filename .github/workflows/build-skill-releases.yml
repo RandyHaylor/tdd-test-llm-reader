@@ -1,0 +1,36 @@
+name: Build Skill Releases
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build platform skill zips
+        run: |
+          mkdir -p dist
+          for platform in claude copilot openclaw gemini-cli cline cursor; do
+            staging="staging/$platform/fastReader"
+            mkdir -p "$staging"
+
+            # Copy platform folder contents (fastReaderFolderLocation.md is replaced by the injected source)
+            rsync -a --exclude=fastReaderFolderLocation.md "skill-construction/$platform/" "staging/$platform/"
+
+            # Inject fastReader source in place of PLACEHOLDER
+            cp -r fastReader/. "$staging/"
+
+            # Zip
+            cd staging
+            zip -r "../dist/fastReader-skill-${platform}.zip" "$platform/"
+            cd ..
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip

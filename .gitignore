@@ -4,5 +4,4 @@ __pycache__/
 .pytest_cache/
 .gemini/
 .env
-*.json
-!src/fastReader/config.json
+hooks.md

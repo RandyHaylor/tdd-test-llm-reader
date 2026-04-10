@@ -1,0 +1,11 @@
+{
+  "after_load_single": [
+    "Browse: python3 -m fastReader.toc --sections {manifest_id}",
+    "Search: python3 -m fastReader.search <keywords> --manifests {manifest_id} [--exact] [--case-sensitive] [--all]"
+  ],
+  "after_load_multi": [
+    "Browse: python3 -m fastReader.toc --sections <hash>",
+    "Search: python3 -m fastReader.search <keywords> --manifests {all_hashes} [--exact] [--case-sensitive] [--all]"
+  ],
+  "after_toc": "To search: python3 -m fastReader.search <keywords> --manifests {manifest_id} [hash2 ...] [--exact] [--case-sensitive] [--all]"
+}
