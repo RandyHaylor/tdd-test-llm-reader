@@ -132,8 +132,9 @@ def test_wrapper_detects_json_binary_and_passes_through_when_present(tmp_path):
         str(fake_json_binary_path)
     )
     assert help_returncode == 0
-    assert "detected:" in stdout
-    assert str(fake_json_binary_path) in stdout
+    # When json is available the wrapper prints wrapper_help_json_on.txt,
+    # which integrates `json` into the subcommand list as a first-class option.
+    assert "load | toc | get | search | json" in stdout
 
     stdout, _stderr, pass_returncode = run_wrapper_with_custom_json_bin_env_var(
         str(fake_json_binary_path), "json", "some_file.json", "--search-vals", "error"
@@ -143,12 +144,18 @@ def test_wrapper_detects_json_binary_and_passes_through_when_present(tmp_path):
 
 
 def test_wrapper_unknown_subcommand_message_adjusts_to_json_availability(tmp_path):
+    # On unknown subcommand, stderr begins with the error line and then prints
+    # the full help text (wrapper_help_json_{on,off}.txt). The help body
+    # reveals whether the `json` subcommand is available.
     missing_bin_path = str(tmp_path / "does_not_exist_quick_json_reader")
     _stdout, stderr_absent, returncode_absent = run_wrapper_with_custom_json_bin_env_var(
         missing_bin_path, "frobnicate"
     )
     assert returncode_absent == 2
-    assert "install quick-json-reader skill" in stderr_absent
+    assert "unknown subcommand 'frobnicate'" in stderr_absent
+    assert "NOT INSTALLED" in stderr_absent            # from wrapper_help_json_off.txt
+    assert "load | toc | get | search" in stderr_absent
+    assert "| json" not in stderr_absent               # json not advertised when absent
 
     fake_json_binary_path = tmp_path / "fake_quick_json_reader_binary_for_unknown_subcmd"
     fake_json_binary_path.write_text("#!/bin/bash\nexit 0\n")
@@ -157,4 +164,5 @@ def test_wrapper_unknown_subcommand_message_adjusts_to_json_availability(tmp_pat
         str(fake_json_binary_path), "frobnicate"
     )
     assert returncode_present == 2
-    assert "load, toc, get, search, json" in stderr_present
+    assert "unknown subcommand 'frobnicate'" in stderr_present
+    assert "load | toc | get | search | json" in stderr_present   # from wrapper_help_json_on.txt

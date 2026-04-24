@@ -1,23 +1,21 @@
 #!/bin/bash
-# fastReader wrapper.
-# Location assumption: this script lives INSIDE the fastReader/ folder
-# (i.e. alongside cli.py, scanner.py, etc.). It sets PYTHONPATH to the
-# parent of that folder so `python3 -m fastReader.<cmd>` resolves.
-#
-# Optional `json` subcommand: if the sibling quick-json-reader skill is
-# installed (i.e. <skills-parent>/quick-json-reader/quick-json-reader
-# exists and is executable), `fastReader json <args...>` pass-through
-# launches that binary. Override the probed path with FAST_READER_JSON_BIN.
+# fastReader wrapper (Linux/macOS). Thin dispatcher:
+#   - load|toc|get|search -> python -m fastReader.<cmd> (PYTHONPATH auto-set)
+#   - json               -> pass-through to the quick-json-reader binary
+#                           when the sibling skill is installed
+# All human-readable help text lives in:
+#   wrapper_help_json_on.txt
+#   wrapper_help_json_off.txt
+# so that .sh and .bat share one source of truth and stay in sync.
 
 set -e
 
-# Use the invocation path as-is; do NOT call readlink -f here. The whole point
-# of a symlinked install (e.g. ~/.claude/skills/fastReader -> dev-checkout)
-# is that the wrapper should see itself living at the symlink path so that
-# PYTHONPATH and the sibling-skill json probe resolve relative to the
-# invoker's skills root, not the dev checkout's parent.
-FAST_READER_WRAPPER_SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"                     # .../fastReader (preserves symlinks)
-FAST_READER_SKILL_PARENT_DIR="$(dirname "$FAST_READER_WRAPPER_SCRIPT_DIR")"         # parent that contains fastReader
+# Use invocation path as-is so folder symlinks remain transparent
+# (e.g. ~/.claude/skills/fastReader -> dev checkout). Do NOT call
+# readlink -f here; that would collapse the symlink and move the
+# json-probe out of the invoker's skills-root.
+FAST_READER_WRAPPER_SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+FAST_READER_SKILL_PARENT_DIR="$(dirname "$FAST_READER_WRAPPER_SCRIPT_DIR")"
 
 FAST_READER_DEFAULT_JSON_BIN_PATH="$FAST_READER_SKILL_PARENT_DIR/quick-json-reader/quick-json-reader"
 FAST_READER_JSON_BIN_PATH="${FAST_READER_JSON_BIN:-$FAST_READER_DEFAULT_JSON_BIN_PATH}"
@@ -27,40 +25,14 @@ is_quick_json_reader_binary_available() {
 }
 
 print_fast_reader_wrapper_help_text() {
-  cat <<USAGE
-usage: fastReader <subcommand> [args...]
-subcommands: load | toc | get | search
-examples:
-  fastReader load big_doc.md
-  fastReader toc <hash> --sections --show-line-range-count
-  fastReader get <hash> --section 3
-  fastReader search error --manifests <hash>
-Add --help / --help-examples / --help-use-cases to any subcommand
-for argparse flags, copy-paste recipes, or trigger->command mapping.
-
-Optional module:
-USAGE
   if is_quick_json_reader_binary_available; then
-    cat <<JSON_ON
-  json  (detected: $FAST_READER_JSON_BIN_PATH)
-        Pass-through to the quick-json-reader binary for JSON-specific
-        extraction/filtering. Example: fastReader json file.json --search-vals error
-JSON_ON
+    cat "$FAST_READER_WRAPPER_SCRIPT_DIR/wrapper_help_json_on.txt"
   else
-    cat <<JSON_OFF
-  json  (NOT INSTALLED)
-        fastReader already efficiently parses and displays bracketed and
-        tagged text. For much more versatile JSON-specific integration —
-        schema inference, value search, field exclusion — install the
-        quick-json-reader skill alongside this one. When the binary is
-        detected at <skills-parent>/quick-json-reader/quick-json-reader
-        (or the FAST_READER_JSON_BIN env var), the json module becomes
-        available automatically. No reinstall of fastReader required.
-JSON_OFF
+    cat "$FAST_READER_WRAPPER_SCRIPT_DIR/wrapper_help_json_off.txt"
   fi
 }
 
-if [ "$#" -lt 1 ]; then
+if [ "$#" -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   print_fast_reader_wrapper_help_text
   exit 0
 fi
@@ -83,17 +55,9 @@ case "$FAST_READER_SUBCOMMAND_NAME" in
       exit 3
     fi
     ;;
-  -h|--help)
-    print_fast_reader_wrapper_help_text
-    exit 0
-    ;;
   *)
     echo "fastReader: unknown subcommand '$FAST_READER_SUBCOMMAND_NAME'" >&2
-    if is_quick_json_reader_binary_available; then
-      echo "valid: load, toc, get, search, json" >&2
-    else
-      echo "valid: load, toc, get, search  (install quick-json-reader skill to enable 'json')" >&2
-    fi
+    print_fast_reader_wrapper_help_text >&2
     exit 2
     ;;
 esac
