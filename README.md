@@ -88,14 +88,23 @@ REM Windows
 
 Running the wrapper with no args — or with `--help` — prints the subcommand list, examples, and whether the optional `json` module is detected.
 
-### Raw Python (fallback)
+### Direct Python integration (skip the wrapper)
 
-If you'd rather skip the wrapper, invoke the modules directly. `PYTHONPATH` must point at the **parent** of the `fastReader/` folder — a common footgun is pointing at `fastReader/` itself.
+The wrapper is for convenience; the Python modules themselves are the public interface and are safe to invoke directly. Use this path when you want to:
+
+- **Embed fastReader in your own CLI / dispatcher / orchestrator** — call `python3 -m fastReader.<cmd>` from whichever runner you already have.
+- **Import as a library** — `from fastReader.commands.load import run_load`, `from fastReader.commands.toc import run_toc`, and so on. Each subcommand's `run_*` function is what the CLI uses internally and is stable.
+- **Pipe output into another tool** — no shell-wrapper indirection between your pipeline and Python.
+- **Run in a container / CI job** where the wrapper script is awkward to ship.
+
+Invocation:
 
 ```bash
 PYTHONPATH=~/.claude/skills python3 -m fastReader.load big_doc.md
 PYTHONPATH=~/.claude/skills python3 -m fastReader.toc <hash> --sections --show-line-range-count
 ```
+
+**PYTHONPATH foot-gun:** it must point at the **parent** of the `fastReader/` folder — pointing at `fastReader/` itself fails because `python3 -m fastReader.load` needs `fastReader` importable as a package. The wrapper exists specifically to absorb this; use it if you don't need the direct-Python path.
 
 ---
 

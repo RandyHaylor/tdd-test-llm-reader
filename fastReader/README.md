@@ -41,7 +41,23 @@ REM Windows
 
 Running the wrapper with no args prints the subcommand list and tells you whether the optional `json` module (see below) is detected.
 
-**Raw Python fallback** (only if you cannot use the wrapper): `PYTHONPATH=<parent-of-fastReader> python3 -m fastReader.<cmd> …`. **Common foot-gun:** `PYTHONPATH` must be the **parent** of the `fastReader/` folder, not the folder itself. The wrapper eliminates this.
+### Direct Python integration (skip the wrapper)
+
+The wrapper is for convenience; the Python modules themselves are the public interface and are safe to invoke directly. Use this path when you want to:
+
+- **Embed fastReader in your own CLI / dispatcher / orchestrator** — call `python3 -m fastReader.<cmd>` from any runner you already have.
+- **Import as a library** — `from fastReader.commands.load import run_load`, `from fastReader.commands.toc import run_toc`, etc. Each subcommand's `run_*` function is the entry point used by the CLI itself and is stable.
+- **Pipe output into another tool** — no shell-wrapper indirection between your pipeline and Python.
+- **Run in a container / CI job** where the wrapper script is awkward to ship.
+
+Invocation:
+
+```bash
+PYTHONPATH=<parent-of-fastReader> python3 -m fastReader.load big_doc.md
+PYTHONPATH=<parent-of-fastReader> python3 -m fastReader.toc <hash> --sections --show-line-range-count
+```
+
+**PYTHONPATH foot-gun:** it must be the **parent** of the `fastReader/` folder, not `fastReader/` itself — `python3 -m fastReader.load` needs `fastReader` importable as a package. The wrapper exists specifically to absorb this; pick it up if you don't need the direct integration.
 
 Manifest hashes are deterministic from file content + slice range, cached at `~/.fastReader/cache/`. Tests: `python3 -m pytest fastReader/test -q` (108 green as of this writing).
 
