@@ -11,8 +11,12 @@
 
 set -e
 
-FAST_READER_WRAPPER_SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
-FAST_READER_WRAPPER_SCRIPT_DIR="$(dirname "$FAST_READER_WRAPPER_SCRIPT_PATH")"     # .../fastReader
+# Use the invocation path as-is; do NOT call readlink -f here. The whole point
+# of a symlinked install (e.g. ~/.claude/skills/fastReader -> dev-checkout)
+# is that the wrapper should see itself living at the symlink path so that
+# PYTHONPATH and the sibling-skill json probe resolve relative to the
+# invoker's skills root, not the dev checkout's parent.
+FAST_READER_WRAPPER_SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"                     # .../fastReader (preserves symlinks)
 FAST_READER_SKILL_PARENT_DIR="$(dirname "$FAST_READER_WRAPPER_SCRIPT_DIR")"         # parent that contains fastReader
 
 FAST_READER_DEFAULT_JSON_BIN_PATH="$FAST_READER_SKILL_PARENT_DIR/quick-json-reader/quick-json-reader"
