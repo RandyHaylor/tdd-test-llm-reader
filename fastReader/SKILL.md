@@ -32,8 +32,6 @@ fastReader ships cross-platform wrapper scripts that auto-resolve `PYTHONPATH` f
 
 Subcommands: `load | toc | get | search` (plus optional `json` — see below). Run the wrapper with **no args** to see available subcommands and whether the `json` module is detected.
 
-**Raw Python fallback** (only if the wrapper is unavailable): `PYTHONPATH=<parent-of-skill-dir> python3 -m fastReader.<subcmd> ...`. **Common foot-gun:** `PYTHONPATH` must be the **parent** of the `fastReader/` folder — **not** the folder itself. The wrapper eliminates this entirely; prefer it.
-
 In the recipes below, `fastReader.sh` is shorthand — prepend `<skill-dir>/` (or use `fastReader.bat` on Windows).
 
 ## The histogram IS the TOC-chooser (the core idea)
