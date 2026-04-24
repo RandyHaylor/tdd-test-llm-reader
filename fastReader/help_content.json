@@ -1,0 +1,97 @@
+{
+  "load": {
+    "examples": [
+      "# Scan one file (prints marker counts + hash; this is always your first move)",
+      "python3 -m fastReader.load big_doc.md",
+      "",
+      "# Load many files at once - each gets its own hash, same call",
+      "python3 -m fastReader.load doc1.md doc2.md doc3.md",
+      "",
+      "# Slice-load: carve out lines START..START+COUNT-1 as a new hashed sub-document",
+      "# Use this after toc shows you that section 4 spans 1382 lines starting at line 668",
+      "python3 -m fastReader.load big_doc.md --line 668 1382",
+      "",
+      "# Load and immediately search inside (shortcut for common case)",
+      "python3 -m fastReader.load session.jsonl --search 'error timeout' --sample-size 80"
+    ],
+    "use_cases": [
+      "User says 'look at this file'         -> load <file>",
+      "User says 'search across my N files'  -> load <files...>  then search --manifests <all-hashes>",
+      "User says 'drill into section X'      -> load <file> --line <start> <count>  (from the toc you saw)",
+      "User says 'what did we talk about X'  -> load ~/.claude/projects/<slug>/<session>.jsonl  then search"
+    ]
+  },
+  "toc": {
+    "examples": [
+      "# Sections with line ranges and sizes - the essential overview",
+      "python3 -m fastReader.toc <hash> --sections --show-line-range-count --sample-size 80",
+      "",
+      "# Hypothesis + conclusion view: intro AND closing thought of every section",
+      "python3 -m fastReader.toc <hash> --sections --show-line-range-count \\",
+      "    --sample-size 80 --end-sample-size 120 --limit 0",
+      "",
+      "# Python / YAML / indented-code navigation",
+      "python3 -m fastReader.toc <hash> --indent-depth 0 --sample-size 80  # top-level defs/classes",
+      "python3 -m fastReader.toc <hash> --indent-depth 1 --sample-size 80  # methods, inner scopes",
+      "",
+      "# JSONL record-level navigation - each line at bracket depth 1",
+      "python3 -m fastReader.toc <hash> --bracket-depth 1 --sample-size 120 --limit 20",
+      "",
+      "# HTML / XML navigation by tag nesting",
+      "python3 -m fastReader.toc <hash> --tag-depth 2 --sample-size 60"
+    ],
+    "use_cases": [
+      "'overview this doc'               -> --sections --show-line-range-count --sample-size 80",
+      "'which sections are meatiest'     -> --sections --show-line-range-count (sort by line_span in output)",
+      "'gist + conclusion of each sect'  -> --sample-size 80 --end-sample-size 120",
+      "'list every function in this py'  -> --indent-depth 0 (top-level) or --indent-depth 1 (methods)",
+      "'what record types in this jsonl' -> --bracket-depth 1 --sample-size 120",
+      "'map out this HTML page'          -> --tag-depth 2"
+    ]
+  },
+  "get": {
+    "examples": [
+      "# Get a whole section's content (use after toc to identify section N)",
+      "python3 -m fastReader.get <hash> --section 3",
+      "",
+      "# Chapter-level",
+      "python3 -m fastReader.get <hash> --chapter 1",
+      "",
+      "# Specific subsection",
+      "python3 -m fastReader.get <hash> --subsection 12",
+      "",
+      "# Block (fixed-size fallback chunk, useful for files without headers)",
+      "python3 -m fastReader.get <hash> --block 42"
+    ],
+    "use_cases": [
+      "After toc reveals section of interest    -> get --section N     (read it in full)",
+      "Chapter-level drill                      -> get --chapter N",
+      "Subsection drill                         -> get --subsection N",
+      "No markdown headers, raw block fallback  -> get --block N"
+    ]
+  },
+  "search": {
+    "examples": [
+      "# Search one loaded manifest",
+      "python3 -m fastReader.search SessionStart --manifests <hash> --sample-size 80",
+      "",
+      "# Cross-search across many loaded files at once",
+      "python3 -m fastReader.search 'error code' --manifests <h1> <h2> <h3>",
+      "",
+      "# Exact-word match (vs substring)",
+      "python3 -m fastReader.search 'hook' --manifests <hash> --exact",
+      "",
+      "# Case-sensitive",
+      "python3 -m fastReader.search 'SessionStart' --manifests <hash> --case-sensitive",
+      "",
+      "# All keywords on the same line (AND) rather than any-match (OR)",
+      "python3 -m fastReader.search user assistant --manifests <hash> --all"
+    ],
+    "use_cases": [
+      "'find X across all loaded files'    -> search X --manifests <all-hashes>",
+      "'find the exact word X, not Xy'     -> search X --manifests <hash> --exact",
+      "'find lines with both A and B'      -> search A B --manifests <hash> --all",
+      "'find where chapter/section talks'  -> search X (returns breadcrumbs showing container)"
+    ]
+  }
+}

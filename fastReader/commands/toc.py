@@ -5,11 +5,12 @@ from fastReader.models import Document
 from fastReader.toc_cli import build_toc
 
 def run_toc(
-    manifest_hash: str, 
-    cache_dir: str, 
-    marker_types: Optional[List[str]] = None, 
+    manifest_hash: str,
+    cache_dir: str,
+    marker_types: Optional[List[str]] = None,
     preview_length: int = 30,
-    limit: Optional[int] = 15
+    limit: Optional[int] = 15,
+    end_preview_length: int = 0,
 ) -> List[Dict[str, Any]]:
     """Execute the toc command logic.
     
@@ -30,9 +31,10 @@ def run_toc(
     document = Document.from_file(content_path)
     
     return build_toc(
-        manifest, 
-        document.lines, 
-        marker_types=marker_types, 
+        manifest,
+        document.lines,
+        marker_types=marker_types,
         preview_length=preview_length,
-        limit=limit
+        limit=limit,
+        end_preview_length=end_preview_length,
     )

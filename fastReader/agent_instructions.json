@@ -7,5 +7,7 @@
     "Browse: python3 -m fastReader.toc --sections <hash>",
     "Search: python3 -m fastReader.search <keywords> --manifests {all_hashes} [--exact] [--case-sensitive] [--all]"
   ],
-  "after_toc": "To search: python3 -m fastReader.search <keywords> --manifests {manifest_id} [hash2 ...] [--exact] [--case-sensitive] [--all]"
+  "after_toc": "To search: python3 -m fastReader.search <keywords> --manifests {manifest_id} [hash2 ...] [--exact] [--case-sensitive] [--all]",
+  "after_toc_truncation_note": "INTEGRITY NOTE: Previews above are truncated. This tool is for FAST SCANNING and DRILLING, not for final answers. Once you identify a section of interest, READ IT IN FULL with 'get --section N' (or 'load --line START COUNT' to re-ingest just that slice). If new terminology appeared in a preview, run 'search <term> --manifests <hash>' across the doc before concluding — previews may crop out the details that matter most.",
+  "after_toc_truncation_warning_high_ratio": "WARNING: '{section_label}' spans {span} lines but the preview is a tiny window. The end-preview shown is the LAST line of that block, NOT a summary. Do not treat it as the section's conclusion. Use 'get' or 'load --line' for the real content."
 }

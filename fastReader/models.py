@@ -1,7 +1,13 @@
+import re
 from dataclasses import dataclass
 from typing import Dict, List
 
 VALID_MARKER_TYPES = {"chapter", "section", "subsection", "page_break", "page", "double_line_break", "block"}
+
+# Depth-suffixed marker kinds: indent_depth_0, indent_depth_1, ...; bracket_depth_0, bracket_depth_1, ...
+# These are produced by the two new structural scanners (indent-level transitions and
+# bracket-nesting transitions) and may appear at any non-negative integer depth.
+_VALID_DEPTH_MARKER_PATTERN = re.compile(r'^(indent_depth|bracket_depth|tag_depth)_\d+$')
 
 
 @dataclass
@@ -11,10 +17,15 @@ class Marker:
     index: int
     line: int
     char_index: int  # Within-line position where content starts (after whitespace)
+    children_count: int = 0  # Number of immediate child markers beneath this one
+    line_span: int = 0  # Distance (in lines) to the next same-kind marker or end-of-file
 
     def __post_init__(self):
-        if self.marker_type not in VALID_MARKER_TYPES:
-            raise ValueError(f"marker_type must be one of {VALID_MARKER_TYPES}, got {self.marker_type}")
+        if self.marker_type in VALID_MARKER_TYPES:
+            return
+        if _VALID_DEPTH_MARKER_PATTERN.match(self.marker_type):
+            return
+        raise ValueError(f"marker_type not recognized: {self.marker_type}")
 
 
 @dataclass
