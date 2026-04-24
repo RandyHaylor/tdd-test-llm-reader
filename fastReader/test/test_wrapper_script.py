@@ -74,7 +74,8 @@ def test_wrapper_load_on_tiny_tempfile_returns_count_summary_and_hash():
     assert returncode == 0, f"wrapper load failed: stderr={stderr!r}"
     assert "Chapters:" in stdout
     assert "Sections:" in stdout
-    assert "Browse: python3 -m fastReader.toc --sections" in stdout
+    # agent_instructions.json now emits wrapper-form Browse hints, not raw python.
+    assert "Browse: fastReader.sh toc" in stdout
 
 
 def test_wrapper_help_flag_alone_prints_usage_and_exits_zero():
