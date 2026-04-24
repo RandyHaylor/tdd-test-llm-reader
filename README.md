@@ -261,7 +261,7 @@ At startup, `fastReader.sh` / `fastReader.bat` probes for the quick-json-reader 
 1. `$FAST_READER_JSON_BIN` environment variable (absolute path override).
 2. Sibling skills folder: `<parent-of-fastReader>/quick-json-reader/quick-json-reader` (Linux/macOS) or `…\quick-json-reader\quick-json-reader.exe` (Windows).
 
-If found, `json` is added to the subcommand whitelist and the wrapper's own `--help` output lists it with the detected path. If not found, the help output instead shows a clear `json (NOT INSTALLED)` block telling the reader how to unlock it — no silent failures, no cryptic "file not found" errors. Invoking `fastReader.sh json …` while the binary is missing exits with code `3` and a stderr install hint.
+If found, `json` is listed as a first-class subcommand alongside `load | toc | get | search` in the wrapper's own `--help` output, complete with its own example line. If not found, the help instead shows a clear `Optional module: json (NOT INSTALLED)` block telling the reader how to unlock it — no silent failures, no cryptic "file not found" errors. Invoking `fastReader.sh json …` while the binary is missing exits with code `3` and a stderr install hint.
 
 ### Pass-through, not reinterpretation
 
@@ -327,11 +327,24 @@ Optional module:
 ### Help surface when the binary is present
 
 ```text
-Optional module:
-  json  (detected: /home/you/.claude/skills/quick-json-reader/quick-json-reader)
-        Pass-through to the quick-json-reader binary for JSON-specific
-        extraction/filtering. Example: fastReader json file.json --search-vals error
+$ fastReader.sh
+usage: fastReader <subcommand> [args...]
+subcommands: load | toc | get | search | json
+examples:
+  fastReader load big_doc.md
+  fastReader toc <hash> --sections --show-line-range-count
+  fastReader get <hash> --section 3
+  fastReader search error --manifests <hash>
+  fastReader json file.json --search-vals error
+Add --help / --help-examples / --help-use-cases to any subcommand
+for argparse flags, copy-paste recipes, or trigger->command mapping.
+
+The json subcommand is provided by the sibling quick-json-reader skill,
+detected on the skills-root alongside fastReader. Override the probed
+path with the FAST_READER_JSON_BIN environment variable.
 ```
+
+Both help variants live in text files (`wrapper_help_json_on.txt` and `wrapper_help_json_off.txt`) that the `.sh` and `.bat` wrappers share — editing the help text touches one file and both platforms update in lockstep.
 
 No `fastReader` reinstall is needed when you add (or remove) quick-json-reader later — the wrapper detects the binary on every invocation.
 
